@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop = "http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+
+    <!-- Включаем АОР аннотации -->
+    <aop:aspectj-autoproxy />
+
+    <!-- Классы аспектов для логирования -->
+    <bean name="xmlLogger" class="com.homework.aop.logging.XmlAopLogger"/>
+    <bean name="annLogger" class="com.homework.aop.logging.AnnAopLogger"/>
+
+    <!-- Классы приложения -->
+    <bean name="vahtersha" class="com.homework.aop.people.Vahtersha"/>
+    <bean name="visitorsFactory" class="com.homework.aop.people.VisitorsFactory"/>
+
+    <!-- Конфигурация AOP в виде XML -->
+    <aop:config>
+        <aop:pointcut id="security" expression="execution(* com.homework.aop.people.Vahtersha.*(..))"/>
+        <aop:pointcut id="newVisitor" expression="execution(* com.homework.aop.people.Vahtersha.newVisitor(..)) and args(visitor)"/>
+        <aop:pointcut id="leaveVisitor" expression="execution(* com.homework.aop.people.Vahtersha.leaveVisitor(..)) and args(visitor)"/>
+
+        <aop:aspect ref="xmlLogger">
+            <aop:before pointcut-ref="security" method="logBefore"/>
+
+            <aop:after pointcut-ref="security" method="logAfter"/>
+
+            <aop:after-returning pointcut-ref="security" method="logAfterSuccess"/>
+
+            <aop:after-throwing pointcut-ref="security" method="logAfterException"/>
+
+            <aop:around pointcut-ref="newVisitor" method="logAround"/>
+            <aop:around pointcut-ref="leaveVisitor" method="logAround"/>
+        </aop:aspect>
+    </aop:config>
+</beans>
